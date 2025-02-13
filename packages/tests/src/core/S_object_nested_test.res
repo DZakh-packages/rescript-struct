@@ -1,5 +1,4 @@
 open Ava
-open RescriptCore
 
 test("Object with a single nested field", t => {
   let schema = S.object(s => s.nested("nested").field("foo", S.string))
@@ -310,6 +309,25 @@ test("S.schema object with a deep strict applied to the nested field parent", t 
     `i=>{if(typeof i!=="object"||!i||Array.isArray(i)){e[4](i)}let v0=i["nested"],v3;if(typeof v0!=="object"||!v0||Array.isArray(v0)){e[0](v0)}let v1=v0["foo"],v2;if(typeof v1!=="string"){e[1](v1)}for(v2 in v0){if(v2!=="foo"){e[2](v2)}}for(v3 in i){if(v3!=="nested"){e[3](v3)}}return i}`,
   )
   t->U.assertCompiledCode(~schema, ~op=#ReverseConvert, `i=>{let v0=i["nested"];return i}`)
+})
+
+test("Nested tags on reverse convert", t => {
+  let schema = S.object(s => {
+    s.nested("nested").tag("tag", "value")
+  })
+
+  t->Assert.deepEqual(()->S.reverseConvertOrThrow(schema), %raw(`{"nested":{"tag":"value"}}`), ())
+})
+
+test("Nested preprocessed tags on reverse convert", t => {
+  let schema = S.object(s => {
+    let _ = s.nested("nested").field(
+      "tag",
+      S.literal("value")->S.preprocess(_ => {serializer: v => "_" ++ v->Obj.magic}),
+    )
+  })
+
+  t->Assert.deepEqual(()->S.reverseConvertOrThrow(schema), %raw(`{"nested":{"tag":"_value"}}`), ())
 })
 
 test("S.schema object with a deep strict applied to the nested field parent + reverse", t => {
