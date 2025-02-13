@@ -1747,7 +1747,7 @@ function preprocess(schema, transformer) {
     }
   }, undefined, () => {
     let reversed = schema["~r"]();
-    return makeReverseSchema(primitiveName, "unknown", empty, (b, input, param, path) => {
+    return makeReverseSchema(primitiveName, reversed.t, empty, (b, input, param, path) => {
       let input$1 = reversed.b(b, input, reversed, path);
       let match = transformer(effectCtx(b, schema, path));
       let serializer = match.s;
